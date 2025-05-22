@@ -79,7 +79,7 @@ export default class ChatServer {
 
 	private clientDisconnected(username: string) {
 		this.connectedClients.delete(username);
-		const room = this.listRoom.get("Public Room");
+		const room = this.findRoomByUsername(username);
 		if (room) {
 			room.roomMember = room.roomMember.filter((client) => client.username !== username);
 		}
@@ -159,7 +159,7 @@ export default class ChatServer {
 			}));
 		}
 		else {
-			alert("Password Salah");
+			alert("Password salah");
 			return;
 		}
 	}
