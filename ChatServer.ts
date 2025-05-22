@@ -27,7 +27,7 @@ export default class ChatServer {
 		const username = ctx.request.url.searchParams.get("username");
 
 		if (this.connectedClients.has(username)) {
-			socket.close(1008, `Username ${username} is already taken`);
+			socket.close(1008, `Username '${username}' is already taken`);
 			return;
 		}
 
@@ -61,14 +61,11 @@ export default class ChatServer {
 		};
 		this.connectedClients.set(username, socket);
 
-		console.log(`New client connected: ${username}`);
+		console.log(`New client connected: '${username}'`);
 	}
 
 	private send(username: string, message: any) {
 		const data = JSON.parse(message.data);
-		if (data.event !== "send-message") {
-			return;
-		}
 
 		this.broadcast({
 			event: "send-message",
@@ -84,7 +81,7 @@ export default class ChatServer {
 			room.roomMember = room.roomMember.filter((client) => client.username !== username);
 		}
 		this.broadcastUsernames();
-		console.log(`Client ${username} disconnected and removed from the room.`);
+		console.log(`Client '${username}' disconnected and removed from the room.`);
 	}
 
 	private broadcastUsernames() {

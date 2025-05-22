@@ -136,6 +136,9 @@ const form = document.getElementById("form");
 form.onsubmit = (e) => {
   e.preventDefault();
   const message = inputElement.value;
+  if (message === "") {
+    return;
+  }
   inputElement.value = "";
   socket.send(JSON.stringify({ event: "send-message", message }));
 };
