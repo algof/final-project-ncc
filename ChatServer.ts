@@ -8,16 +8,6 @@ type Room = {
 	password?: string;
 	roomMember: WebSocketWithUsername[];
 };
-type Polling = {
-	username: string;
-	question: string;
-	answers: string[];
-	duration: number;
-	startTime: number;
-	percentages: Record<string, number>;
-	totalVotes: number;
-	answerCounts: Record<string, number>;
-};
 
 export default class ChatServer {
 	private connectedClients = new Map<string, WebSocketWithUsername>();
@@ -63,6 +53,10 @@ export default class ChatServer {
 			else if (data.event === "join-room") {
 				this.updateMemberInRooms(data);
 				console.log("Update members in room messages", JSON.stringify(data));
+			}
+			else if (data.event === "delete-room") {
+				this.deleteRoom(data);
+				console.log("Deleting rooms, messages", JSON.stringify(data));
 			}
 		};
 		this.connectedClients.set(username, socket);
@@ -152,7 +146,7 @@ export default class ChatServer {
 	}
 
 	updateMemberInRooms(message: AppEvent) {
-		const newRoom = this.listRoom.get(message.roomName); // -> sudah di roomnya
+		const newRoom = this.listRoom.get(message.roomName);
 		const oldRoom = this.findRoomByUsername(message.username);
 		const socket = this.connectedClients.get(message.username);
 
@@ -168,5 +162,17 @@ export default class ChatServer {
 			alert("Password Salah");
 			return;
 		}
+	}
+
+	deleteRoom(message: AppEvent) {
+		const newRoom = this.listRoom.get("Public Room");
+		const oldRoom = this.listRoom.get(message.roomName);
+		if (newRoom && oldRoom) {
+			for (const member of oldRoom.roomMember) {
+				newRoom.roomMember.push(member);
+			}
+			this.listRoom.delete(message.roomName);
+		}
+		this.broadcastUsernames();
 	}
 }
