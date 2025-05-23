@@ -1,4 +1,12 @@
-const myUsername = prompt("Please enter your name") || "Anonymous";
+const myUsername = localStorage.getItem("username");
+
+if (!myUsername) {
+  alert("You must login first.");
+  window.location.href = "/public/login.html";
+} else {
+  document.getElementById("username-display").textContent = `Hello, ${myUsername}!`;
+}
+
 const url = new URL(`./start_web_socket?username=${myUsername}`, location.href);
 url.protocol = url.protocol.replace("http", "ws");
 const socket = new WebSocket(url);
@@ -125,7 +133,11 @@ function addMessage(username, message) {
 
   clone.querySelector("span").textContent = username;
   clone.querySelector("p").textContent = message;
-  document.getElementById("conversation").prepend(clone);
+  
+  const conversationDiv = document.getElementById("conversation");
+  conversationDiv.append(clone);
+
+  conversationDiv.scrollTop = conversationDiv.scrollHeight;
 }
 
 const inputElement = document.getElementById("data");
@@ -184,4 +196,12 @@ createButton.addEventListener("click", () => {
     createButton.onclick = null;
     createButton.addEventListener("click", arguments.callee);
   };
+});
+
+const logoutButton = document.getElementById('logoutButton');
+
+logoutButton.addEventListener('click', function () {
+  localStorage.clear();
+  alert('Logout Successful');
+  window.location.href = "/public/login.html";  
 });
