@@ -8,10 +8,18 @@ type Room = {
 	password?: string;
 	roomMember: WebSocketWithUsername[];
 };
+type Polling = {
+	pollingId: number;
+	sourceUsername: string;
+	question: string;
+	choices: string[];
+};
 
 export default class ChatServer {
 	private connectedClients = new Map<string, WebSocketWithUsername>();
 	private listRoom = new Map<string, Room>();
+	private pollingIdCounter = 0;
+	private listPolling = new Map<number, Polling>();
 
 	constructor() {
 		const publicRoom: Room = {
@@ -37,8 +45,9 @@ export default class ChatServer {
 		socket.onopen = () => {
 			this.broadcastUsernames();
 		}
-		socket.onclose = () => {
+		socket.onclose = (e) => {
 			this.clientDisconnected(socket.username);
+			console.log("WebSocket closed", e.code, e.reason);
 		};
 		socket.onmessage = (m) => {
 			const data = JSON.parse(m.data);
@@ -58,10 +67,44 @@ export default class ChatServer {
 				this.deleteRoom(data);
 				console.log("Deleting rooms, messages", JSON.stringify(data));
 			}
+			else if (data.event === "create-new-polling") {
+				console.log("Creating new Polling", JSON.stringify(data));
+				this.createNewPolling(data);
+			}
 		};
 		this.connectedClients.set(username, socket);
 
 		console.log(`New client connected: '${username}'`);
+	}
+
+	private createNewPolling(message: AppEvent) {
+		const newPoll: Polling = {
+			pollingId: this.pollingIdCounter,
+			sourceUsername: message.username,
+			question: message.question,
+			choices: message.choices,
+		};
+		this.listPolling.set(this.pollingIdCounter, newPoll);
+
+		this.pollingIdCounter++;
+		console.log(`Counter saat ini: ${this.pollingIdCounter}`)
+
+		const userRoom = this.findRoomByUsername(message.username);
+
+		const messageString =
+			(JSON.stringify({
+				event: "send-polling",
+				sourceUsername: newPoll.sourceUsername,
+				question: newPoll.question,
+				choices: newPoll.choices,
+			}));
+
+		if (userRoom) {
+			for (const client of userRoom.roomMember) {
+				client.send(messageString);
+			}
+		}
+		console.log(`Broadcasting polling in ${userRoom?.name}:`, messageString);
 	}
 
 	private send(username: string, message: any) {
@@ -151,6 +194,10 @@ export default class ChatServer {
 			newRoom.roomMember.push(socket);
 			oldRoom.roomMember = oldRoom.roomMember.filter((client) => client.username !== message.username);
 			this.broadcastUsernames()
+			socket.send(JSON.stringify({
+				event: "update-room-name",
+				roomName: message.roomName
+			}));
 			socket.send(JSON.stringify({
 				event: "clear-chat"
 			}));

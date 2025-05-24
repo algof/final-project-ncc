@@ -1,4 +1,6 @@
 const myUsername = localStorage.getItem("username");
+let myRoomName = 'Public Room';
+let optionCounter = 1;
 
 if (!myUsername) {
   alert("You must login first.");
@@ -26,8 +28,160 @@ socket.onmessage = (event) => {
     case "clear-chat":
       clearChat();
       break;
+
+    case "update-room-name":
+      myRoomName = data.roomName;
+      updateRoomName();
+      break;
+
+    case "send-polling":
+      // renderIncomingPoll(data);
+      break;
   }
 };
+
+// function renderIncomingPoll(data) {
+//   // Buat objek pollData baru dari data socket
+//   const pollDataSocket = {
+//     id: `poll-${Date.now()}`, // ID unik agar tidak bentrok
+//     question: data.question,
+//     options: data.choices.map((choice, idx) => ({
+//       id: `opt-${idx}`,
+//       text: choice,
+//       votes: 0
+//     })),
+//     userHasVoted: false,
+//     userChoiceId: null
+//   };
+
+//   // Simpan ke localStorage agar bisa persist per user
+//   localStorage.setItem(`poll_data_${pollDataSocket.id}`, JSON.stringify(pollDataSocket));
+
+//   // Buat container elemen polling
+//   // const chatContainer = document.getElementById("chat-box"); // Ganti dengan container chat kamu
+//   const chatContainer = document.getElementById("conversation");
+//   const pollWrapper = document.createElement("div");
+//   pollWrapper.classList.add("my-4", "poll-box");
+
+//   // Inject template polling dari yang sudah kamu buat
+//   const pollContainerTemplate = document.getElementById("poll-container-template");
+//   const pollOptionTemplate = document.getElementById("poll-option-template");
+//   const pollContainerNode = pollContainerTemplate.content.cloneNode(true); // pollContainerTemplate adalah null
+//   // ... dan ...
+//   const optionNode = pollOptionTemplate.content.cloneNode(true); // pollOptionTemplate adalah null
+
+//   // Render polling manual (pakai fungsi render khusus)
+//   renderPollInline(pollDataSocket, pollWrapper, pollContainerNode, optionNode);
+
+//   // Tambahkan ke chat
+//   chatContainer.appendChild(pollWrapper);
+// }
+
+// function renderPollInline(data, container, pollContainerTemplate, pollOptionTemplate) {
+//   const pollContainerNode = pollContainerTemplate.content.cloneNode(true);
+//   const pollWrapper = pollContainerNode.querySelector('.poll-wrapper');
+//   pollWrapper.dataset.pollId = data.id;
+//   pollWrapper.querySelector('.poll-question').textContent = data.question;
+//   const optionsContainer = pollWrapper.querySelector('.poll-options-container');
+
+//   data.options.forEach(option => {
+//     const optionNode = pollOptionTemplate.content.cloneNode(true);
+//     const optionDiv = optionNode.querySelector('.poll-option');
+//     optionDiv.dataset.optionId = option.id;
+//     optionDiv.querySelector('.option-text').textContent = option.text;
+
+//     const voteHandler = () => {
+//       // voting handler untuk polling dari socket
+//       if (!data.userHasVoted || data.userChoiceId !== option.id) {
+//         if (data.userHasVoted && data.userChoiceId !== null) {
+//           const prevOpt = data.options.find(opt => opt.id === data.userChoiceId);
+//           if (prevOpt) prevOpt.votes = Math.max(0, prevOpt.votes - 1);
+//         }
+//         option.votes++;
+//         data.userChoiceId = option.id;
+//         data.userHasVoted = true;
+
+//         localStorage.setItem(`poll_data_${data.id}`, JSON.stringify(data));
+//         updateAllOptionDisplaysSocket(pollWrapper, data);
+//         updateFeedbackMessageSocket(pollWrapper, data);
+//         updateTotalVotesDisplaySocket(pollWrapper, data);
+//       }
+//     };
+
+//     optionDiv.addEventListener('click', voteHandler);
+//     optionDiv.addEventListener('keydown', (e) => {
+//       if (e.key === 'Enter' || e.key === ' ') {
+//         e.preventDefault();
+//         voteHandler();
+//       }
+//     });
+
+//     optionsContainer.appendChild(optionNode);
+//   });
+
+//   container.appendChild(pollContainerNode);
+
+//   updateAllOptionDisplaysSocket(pollWrapper, data);
+//   updateFeedbackMessageSocket(pollWrapper, data);
+//   updateTotalVotesDisplaySocket(pollWrapper, data);
+// }
+
+// function updateAllOptionDisplaysSocket(pollWrapperElement, data) {
+//   const optionElements = pollWrapperElement.querySelectorAll('.poll-option');
+//   const totalVotes = data.options.reduce((sum, opt) => sum + opt.votes, 0);
+
+//   optionElements.forEach(optElement => {
+//     const optionId = optElement.dataset.optionId;
+//     const optionData = data.options.find(o => o.id === optionId);
+//     if (!optionData) return;
+
+//     const votesCountEl = optElement.querySelector('.option-votes-count');
+//     const percentageEl = optElement.querySelector('.option-percentage');
+//     const resultBarEl = optElement.querySelector('.result-bar');
+//     const resultBarWrapperEl = optElement.querySelector('.result-bar-wrapper');
+
+//     optElement.classList.remove('border-l-4', 'border-green-500');
+
+//     if (data.userHasVoted) {
+//       votesCountEl.textContent = `${optionData.votes} vote${optionData.votes === 1 ? '' : 's'}`;
+//       votesCountEl.style.display = 'inline';
+//       const percentage = totalVotes > 0 ? ((optionData.votes / totalVotes) * 100) : 0;
+//       percentageEl.textContent = `${percentage.toFixed(1)}%`;
+//       resultBarEl.style.width = `${percentage}%`;
+//       resultBarWrapperEl.style.display = 'block';
+
+//       if (optionData.id === data.userChoiceId) {
+//         optElement.classList.add('border-l-4', 'border-green-500');
+//       }
+//     } else {
+//       votesCountEl.style.display = 'none';
+//       resultBarWrapperEl.style.display = 'none';
+//     }
+//   });
+// }
+
+// function updateFeedbackMessageSocket(pollWrapperElement, data) {
+//   const feedbackEl = pollWrapperElement.querySelector('.poll-feedback');
+//   if (data.userHasVoted) {
+//     feedbackEl.textContent = "Anda telah memilih. Klik opsi lain untuk mengubah pilihan Anda.";
+//     feedbackEl.style.display = 'block';
+//   } else {
+//     feedbackEl.style.display = 'none';
+//   }
+// }
+
+// function updateTotalVotesDisplaySocket(pollWrapperElement, data) {
+//   const totalVotes = data.options.reduce((sum, opt) => sum + opt.votes, 0);
+//   const totalVotesDisplay = pollWrapperElement.querySelector('.poll-total-votes');
+//   if (totalVotesDisplay) {
+//     totalVotesDisplay.textContent = `Total votes: ${totalVotes}`;
+//   }
+// }
+
+function updateRoomName() {
+  const userRoomNameContainer = document.getElementById('current-room-name');
+  userRoomNameContainer.textContent = `${myRoomName}`;
+}
 
 function clearChat() {
   const chatContainer = document.getElementById("conversation");
@@ -43,7 +197,7 @@ function updateUserList(rooms) {
     roomTitleWrapper.style.display = "flex";
     roomTitleWrapper.style.justifyContent = "space-between";
     roomTitleWrapper.style.alignItems = "center";
-    roomTitleWrapper.style.marginBottom = "5px";
+    roomTitleWrapper.style.marginBottom = "0px";
 
     const roomTitle = document.createElement("h3");
     roomTitle.textContent = room.roomName;
@@ -133,7 +287,7 @@ function addMessage(username, message) {
 
   clone.querySelector("span").textContent = username;
   clone.querySelector("p").textContent = message;
-  
+
   const conversationDiv = document.getElementById("conversation");
   conversationDiv.append(clone);
 
@@ -166,9 +320,30 @@ createButton.addEventListener("click", () => {
   const form = document.createElement("form");
 
   form.innerHTML = `
-    <input type="text" id="room-name" placeholder="Room name" required />
-    <input type="password" id="room-password" placeholder="Password" required />
-    <button type="submit">Create</button>
+    <label for="room-name" class="block text-sm font-medium text-gray-700 sr-only">Room name</label>
+    <input 
+      type="text" 
+      id="room-name" 
+      name="room-name"
+      placeholder="Room name" 
+      required 
+      class="w-full m-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+    />
+    <label for="room-password" class="block text-sm font-medium text-gray-700 sr-only">Password</label>
+    <input 
+      type="password" 
+      id="room-password" 
+      name="room-password"
+      placeholder="Password" 
+      required 
+      class="w-full m-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+    />
+  <button 
+    type="submit" 
+    class="w-full m-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
+  >
+    Create
+  </button>
   `;
 
   formContainer.appendChild(form);
@@ -203,5 +378,139 @@ const logoutButton = document.getElementById('logoutButton');
 logoutButton.addEventListener('click', function () {
   localStorage.clear();
   alert('Logout Successful');
-  window.location.href = "/public/login.html";  
+  window.location.href = "/public/login.html";
+});
+
+document.getElementById("create-polling-button").addEventListener('click', () => {
+  document.getElementById("create-polling-modal").classList.remove("hidden");
+});
+
+function createPollingOption() {
+  if (optionCounter >= 10) return;
+
+  optionCounter++;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = `polling-option-${optionCounter}`;
+  input.placeholder = "+ Add option";
+  input.classList.add(
+    "bg-gray-50",
+    "border",
+    "border-gray-300",
+    "text-gray-900",
+    "text-sm",
+    "rounded-lg",
+    "focus:ring-blue-500",
+    "focus:border-blue-500",
+    "block",
+    "w-full",
+    "p-2.5",
+    "dark:bg-gray-600",
+    "dark:border-gray-500",
+    "dark:placeholder-gray-400",
+    "dark:text-white"
+  );
+
+  // Buang listener dari input sebelumnya (biar cuma satu yang bisa nambah)
+  const inputs = document.querySelectorAll('[id^="polling-option-"]');
+  inputs.forEach(input => {
+    input.removeEventListener("focus", createPollingOption);
+  });
+
+  // Tambahkan input ke DOM
+  document.getElementById("polling-options-container").appendChild(input);
+
+  // Tambahkan event listener hanya ke input terakhir
+  input.addEventListener("focus", createPollingOption);
+}
+
+// Saat tombol "Create Polling" diklik, reset polling option
+document.getElementById("create-polling-button").addEventListener('click', () => {
+  document.getElementById("create-polling-modal").classList.remove("hidden");
+
+  optionCounter = 1;
+
+  const container = document.getElementById("polling-options-container");
+  container.innerHTML = "";
+
+  // Buat input pertama
+  const firstInput = document.createElement("input");
+  firstInput.type = "text";
+  firstInput.id = `polling-option-${optionCounter}`;
+  firstInput.placeholder = "+ Add option";
+  firstInput.classList.add(
+    "bg-gray-50",
+    "border",
+    "border-gray-300",
+    "text-gray-900",
+    "text-sm",
+    "rounded-lg",
+    "focus:ring-blue-500",
+    "focus:border-blue-500",
+    "block",
+    "w-full",
+    "p-2.5",
+    "dark:bg-gray-600",
+    "dark:border-gray-500",
+    "dark:placeholder-gray-400",
+    "dark:text-white"
+  );
+
+  // Tambahkan ke container
+  container.appendChild(firstInput);
+
+  // Tambahkan event listener hanya ke input pertama
+  firstInput.addEventListener("focus", createPollingOption);
+});
+
+// Tombol tutup polling
+document.getElementById("start-polling-button").addEventListener('click', () => {
+  let tempChoices = [];
+  let i = 1;
+
+  while (true) {
+    let optionPointer = document.getElementById(`polling-option-${i}`);
+    if (optionPointer) {
+      let val = optionPointer.value.trim();
+      if (val) tempChoices.push(val);
+      i++;
+    } else {
+      break;
+    }
+  }
+
+  let pollingQuestionElem = document.getElementById("polling-question");
+  let pollingQuestion = pollingQuestionElem ? pollingQuestionElem.value.trim() : "";
+
+  if (!pollingQuestion) {
+    alert("Pertanyaan polling tidak boleh kosong!");
+    return;
+  }
+
+  if (tempChoices.length === 0) {
+    alert("Harap isi minimal satu pilihan polling.");
+    return;
+  }
+
+  if (socket.readyState !== WebSocket.OPEN) {
+    alert("Koneksi WebSocket belum siap. Coba lagi nanti.");
+    return;
+  }
+
+  console.log("Polling to send:", { pollingQuestion, tempChoices });
+
+  socket.send(JSON.stringify({
+    event: "create-new-polling",
+    username: myUsername,
+    question: pollingQuestion,
+    choices: tempChoices,
+  }));
+
+  document.getElementById("create-polling-modal").classList.add("hidden");
+});
+
+
+document.getElementById("cancel-create-polling-button").addEventListener('click', () => {
+  document.getElementById("create-polling-modal").classList.add("hidden");
 });

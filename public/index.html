@@ -15,22 +15,31 @@
       <div>
         <div class="flex items-center mb-8">
           <img src="/public/NCConnect_logo.png" alt="NCConnect Logo" class="w-40 md:w-full mb-4">
+        </div>
+
+        <div class="flex flex-col mb-8">
           <button id="create-room-button"
-            class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-150 mb-6">
+            class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-150 m-1">
             Create Private Room
-          </button>       
+          </button>
+          <div id="create-room-form-container" class="mb-4"></div>
         </div>
 
 
-
-        <div id="create-room-form-container" class="mb-4"></div>
         <h2>List Room:</h2>
         <div id="room-list" class="space-y-4"></div>
       </div>
-      
+
       <div class="mt-auto">
         <button id="options-button" class="flex items-center text-gray-600 hover:text-dark-gray">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+            </path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+          </svg>
           Options
         </button>
       </div>
@@ -47,35 +56,112 @@
           </button>
         </div>
       </header>
-      
+
       <div id="conversation" class="flex-1 p-6 overflow-y-auto space-y-4 flex flex-col justify-end">
       </div>
 
-      <div class="bg-white p-4 border-t border-gray-300">
-        <form id="form" class="flex items-center">
+      <div id="create-polling-modal" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+          <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+            <div
+              class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                Create a poll
+              </h3>
+              <button id="cancel-create-polling-button" type="button"
+                class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+              </button>
+            </div>
+            <div class="p-4 md:p-5">
+              <form class="space-y-4" action="#">
+                <div>
+                  <label for="Question"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Question:</label>
+                  <input type="text" name="polling-question" id="polling-question"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    placeholder="Type poll question" required />
+                </div>
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options:</label>
+                  <div id="polling-options-container">
+                    <input type="text" name="polling-option-1" id="polling-option-1"
+                      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      placeholder="+ Add option" required />
+                  </div>
+                </div>
+
+                <button id="start-polling-button" type="submit"
+                  class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Start
+                  Polling</button>
+                <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-row p-4 border-t border-gray-300 ">
+        <button id="create-polling-button" type="button"
+          class="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition duration-150">
+          Poll
+        </button>
+        <div id="create-polling-button-container"></div>
+        <form id="form" class="flex items-center flex-1">
           <input type="text" id="data" placeholder="type here..." autocomplete="off"
-            class="flex-1 border border-gray-300 rounded-lg py-2 px-3 mr-2 focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent" />
+            class="flex-1 border border-gray-300 rounded-lg py-2 px-3 ml-2 mr-2 focus:outline-none focus:ring-2 focus:ring-brand-green focus:border-transparent" />
           <button type="submit" id="send"
             class="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition duration-150">
             Send
           </button>
         </form>
       </div>
-
     </main>
-  </div>  
+  </div>
 
   <template id="user">
     <li></li>
   </template>
   <template id="message">
-    <div class="message-item max-w-xl"> 
+    <div class="message-item max-w-xl">
       <div class="bg-white p-3 rounded-lg shadow">
         <span class="font-semibold text-sm text-brand-green block mb-1 message-username"></span>
-        <p class="text-gray-800 message-text"></p>
+        <p class="text-gray-800 break-words message-text"></p>
       </div>
     </div>
   </template>
+  <template>
+
+  </template>
+  <!-- baru 
+  <template id="poll-container-template">
+    <div class="poll-wrapper my-4 p-4 bg-gray-100 rounded-lg shadow">
+      <h4 class="poll-question font-semibold text-lg mb-3"></h4>
+      <div class="poll-options-container space-y-2">
+      </div>
+      <p class="poll-feedback text-sm text-gray-600 mt-2" style="display: none;"></p>
+      <p class="poll-total-votes text-sm text-gray-600 mt-1"></p>
+    </div>
+  </template>
+
+  <template id="poll-option-template">
+    <div class="poll-option p-2 border border-gray-300 rounded hover:bg-gray-200 cursor-pointer" tabindex="0">
+      <div class="flex justify-between items-center">
+        <span class="option-text"></span>
+        <span class="option-votes-count text-xs text-gray-500" style="display: none;"></span>
+      </div>
+      <div class="result-bar-wrapper mt-1 h-2 bg-gray-300 rounded" style="display: none;">
+        <div class="result-bar h-full bg-green-500 rounded"></div>
+      </div>
+      <span class="option-percentage text-xs text-gray-500 ml-2" style="display: none;"></span>
+    </div>
+  </template> -->
 </body>
 
 </html>
