@@ -1,6 +1,6 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import client from "./db.ts"; // asumsi client MySQL kamu sudah dikonfigurasi di sini
+import client from "./db.ts";
 
 export async function registerHandler(ctx: Context) {
   try {
